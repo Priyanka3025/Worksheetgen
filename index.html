@@ -1111,7 +1111,16 @@
         }
 
         function escapeHTML(str) {
-            if (!str) return '';
+            if (str === null || str === undefined) return '';
+            // If passed an object/array, try to extract a sensible string
+            if (typeof str === 'object') {
+                // Try common label fields first
+                if (str.name) str = str.name;
+                else if (str.text) str = str.text;
+                else if (str.label) str = str.label;
+                else if (str.value) str = str.value;
+                else return ''; // Don't show [object Object]
+            }
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
@@ -1251,14 +1260,20 @@
                 case 'categorize':
                     contentHTML = `
                         <div class="items-pool">
-                            ${(activity.items || []).map(item => `<span class="item-chip">${escapeHTML(item)}</span>`).join('')}
+                            ${(activity.items || []).map(item => {
+                                const itemText = (typeof item === 'string') ? item : (item.name || item.text || item.label || JSON.stringify(item));
+                                return `<span class="item-chip">${escapeHTML(itemText)}</span>`;
+                            }).join('')}
                         </div>
                         <div class="category-grid">
-                            ${(activity.categories || []).map(cat => `
-                                <div class="category-box">
-                                    <div class="category-title">${escapeHTML(cat)}</div>
-                                </div>
-                            `).join('')}
+                            ${(activity.categories || []).map(cat => {
+                                const catText = (typeof cat === 'string') ? cat : (cat.name || cat.title || cat.label || JSON.stringify(cat));
+                                return `
+                                    <div class="category-box">
+                                        <div class="category-title">${escapeHTML(catText)}</div>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     `;
                     break;
@@ -1299,14 +1314,49 @@
 
                 case 'label_diagram':
                 case 'diagram_label':
-                    contentHTML = `
-                        <div style="background: #FFFEF8; border: 2px dashed #FFB956; padding: 24px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 13px; color: #888; font-style: italic;">[Diagram to label: ${escapeHTML(activity.diagram || activity.subject || 'Image')}]</div>
-                            <div style="margin-top: 12px;">
-                                ${(activity.labels || []).map(l => `<span class="item-chip" style="margin: 4px;">${escapeHTML(l)}</span>`).join('')}
+                    // Get icons (preferred new format) or fall back to old labels format
+                    const labelIcons = activity.icons || [];
+                    const labels = activity.labels || [];
+                    
+                    if (labelIcons.length > 0) {
+                        // Render icons with empty name boxes underneath (for kids to fill in)
+                        contentHTML = `
+                            <div style="background: #FFFEF8; border: 2px dashed #FFB956; padding: 24px 20px; border-radius: 12px;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 24px; justify-content: center;">
+                                    ${labelIcons.map(item => {
+                                        const iconName = (typeof item === 'string') ? item : (item.icon || item.name || '');
+                                        return `
+                                            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                                <div>${getIcon(iconName, 64)}</div>
+                                                <div style="border: 1.5px solid #999; border-radius: 6px; padding: 8px 12px; min-width: 90px; min-height: 32px; background: white;"></div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else if (labels.length > 0) {
+                        // Old format - just show labels as chips (legacy fallback)
+                        contentHTML = `
+                            <div style="background: #FFFEF8; border: 2px dashed #FFB956; padding: 24px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 13px; color: #888; font-style: italic; margin-bottom: 12px;">Match each label below:</div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                                    ${labels.map(l => {
+                                        // Handle both string and object labels
+                                        const labelText = (typeof l === 'string') ? l : (l.name || l.text || l.label || JSON.stringify(l));
+                                        return `<span class="item-chip">${escapeHTML(labelText)}</span>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Nothing useful sent - show empty box
+                        contentHTML = `
+                            <div style="background: #FFFEF8; border: 2px dashed #FFB956; padding: 24px; border-radius: 12px; text-align: center; color: #888; font-style: italic;">
+                                [Diagram activity]
+                            </div>
+                        `;
+                    }
                     break;
 
                 default:
