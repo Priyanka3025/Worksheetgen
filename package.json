@@ -1,0 +1,9 @@
+{
+  "name": "worksheetgen",
+  "version": "1.0.0",
+  "description": "AI-powered worksheet generator for primary school teachers",
+  "main": "index.html",
+  "engines": {
+    "node": "22.x"
+  }
+}
