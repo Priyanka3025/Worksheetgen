@@ -141,7 +141,7 @@ COLORS (text-only): red, blue, green, yellow, orange, purple, pink, brown, black
 - "circle_correct" (multiple choice)
 - "short_answer" (1-2 sentence answer)
 - "word_problem" (math word problems with Indian context)
-- "label_diagram" (label parts of given image)
+- "label_diagram" (look at icons and write their names — MUST include "icons" array with icon names from the available list, e.g. [{"icon": "bus"}, {"icon": "car"}, {"icon": "train"}])
 - "categorize" (group items by category)
 - "rearrange" (rearrange letters/numbers/words)`;
   } else {
@@ -152,7 +152,7 @@ COLORS (text-only): red, blue, green, yellow, orange, purple, pink, brown, black
 - "short_answer" (2-3 sentence answers)
 - "long_answer" (paragraph answers)
 - "word_problem" (real-world problems)
-- "diagram_label" (label diagrams)
+- "diagram_label" (look at icons and write their names — MUST include "icons" array with icon names from the available list, e.g. [{"icon": "bus"}, {"icon": "car"}, {"icon": "train"}])
 - "categorize" (classify items)
 - "comprehension" (read passage and answer)
 - "application" (apply concept to scenario)`;
@@ -406,6 +406,18 @@ Structure:
       "title": "Trace the numbers",
       "instruction": "Trace each number carefully with a pencil.",
       "letters": "1 2 3 4 5 6 7 8 9 10"
+    },
+    {
+      "number": 12,
+      "type": "label_diagram",
+      "title": "Name these things",
+      "instruction": "Look at each picture and write its name in the box below.",
+      "icons": [
+        {"icon": "bus"},
+        {"icon": "car"},
+        {"icon": "train"},
+        {"icon": "bicycle"}
+      ]
     }
   ],
   "footer": {
