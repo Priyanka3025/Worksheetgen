@@ -126,7 +126,7 @@ COLORS (text-only): red, blue, green, yellow, orange, purple, pink, brown, black
   let activityTypes = '';
   if (isYoung) {
     activityTypes = `For Class 1-3 (young learners), use these activity types:
-- "trace_letters" (trace alphabet/numbers)
+- "trace_letters" (trace alphabet/numbers — MUST include "letters" field with space-separated values like "A B C D E" or "1 2 3 4 5")
 - "count_pictures" (count visible icons)
 - "match_pairs" (match icons to words/numbers)
 - "color_picture" (description of what to color)
@@ -202,6 +202,62 @@ ALWAYS use Indian context in word problems and scenarios:
 - Indian cities: Delhi, Mumbai, Bangalore, Chennai, Kolkata, Pune, Jaipur, Lucknow
 - Indian currency (₹), measurements (km, kg)
 - Indian scenarios: monsoon, Diwali, cricket, joint families, Indian markets
+
+============================
+CRITICAL RULES (MUST FOLLOW)
+============================
+
+**RULE 1: COUNT MUST MATCH INSTRUCTIONS**
+If your instruction text mentions a specific number, the icon count MUST match exactly.
+
+❌ WRONG (this is a bug we want to fix):
+- Instruction: "Color 10 butterflies blue"
+- Icons: [{icon: "butterfly", count: 1}]  ← WRONG! Says 10 but shows 1.
+
+✓ CORRECT:
+- Instruction: "Color 10 butterflies blue"
+- Icons: [{icon: "butterfly", count: 10}]  ← Matches the number 10.
+
+✓ CORRECT:
+- Instruction: "Count the apples"
+- Icons: [{icon: "apple", count: 3, label: "= ___"}, {icon: "apple", count: 5, label: "= ___"}]
+- (Don't say a specific total — just show items to count)
+
+**RULE 2: AVOID "MATCH SAME-LOOKING ITEMS"**
+Our icon library has LIMITED icons. Many things that should look DIFFERENT (like ₹1, ₹2, ₹5 coins, or different sizes/colors) will appear IDENTICAL because we only have ONE icon for them.
+
+❌ AVOID these match activities (they will look broken):
+- "Match the coin to its value" (all coins look the same!)
+- "Match the size of cars" (only one car icon)
+- "Match the bird color" (only one bird icon)
+- ANY match where the LEFT items would all be the same icon
+
+✓ INSTEAD use these match patterns (icons will be different):
+- "Match the animal to its food": [cat ↔ milk], [cow ↔ leaf], [monkey ↔ banana]
+- "Match the picture to the word": [elephant ↔ "Big animal"], [butterfly ↔ "Has wings"]
+- "Match number to picture": [number-3 ↔ "🍎🍎🍎"], [number-5 ↔ "🍎🍎🍎🍎🍎"]
+- "Match the shape to its name": [circle ↔ "Round"], [square ↔ "Four sides"]
+
+For matching, ALWAYS use icons that are visually DIFFERENT from each other.
+
+**RULE 3: COIN/MONEY ACTIVITIES**
+We only have ONE coin icon. So:
+- ❌ Don't use {icon: "coin"} multiple times for different denominations
+- ✓ DO use TEXT for money values: "₹1", "₹2", "₹5" as plain text
+- ✓ For matching money to objects, use coin icon ONCE on left, text/words on right
+
+✓ GOOD coin activity example:
+- Type: "fill_blank"
+- Question: "Riya has ₹5. She buys a pencil for ₹2. How much money does she have left? ₹___"
+- (Use text for amounts, not icons)
+
+**RULE 4: COLORING ACTIVITY GUIDANCE**
+For "color_picture" activities, use 1-3 LARGE icons that kids can color. Don't put 10+ icons (kids can't color so many in one activity).
+
+✓ GOOD: "Color the apple red and the leaf green" with 2 icons (apple, leaf)
+✗ BAD: "Color 20 butterflies" with 20 tiny icons (overwhelming + tiny)
+
+If you need to show "color X items", limit to 3-5 max for visibility.
 
 ============================
 AVAILABLE SVG ICONS
@@ -343,6 +399,13 @@ Structure:
       "type": "draw_picture",
       "title": "Draw and color",
       "instruction": "Draw a picture of your family in the box below."
+    },
+    {
+      "number": 11,
+      "type": "trace_letters",
+      "title": "Trace the numbers",
+      "instruction": "Trace each number carefully with a pencil.",
+      "letters": "1 2 3 4 5 6 7 8 9 10"
     }
   ],
   "footer": {
@@ -352,7 +415,7 @@ Structure:
 }
 
 ============================
-QUALITY CHECKLIST
+QUALITY CHECKLIST (STRICT — verify before output)
 ============================
 
 ✓ Generated EXACTLY ${lengthInfo.activities} activities
@@ -362,6 +425,13 @@ QUALITY CHECKLIST
 ✓ Only used icons from the available list
 ✓ Activities flow from easier → slightly harder
 ✓ Includes answer keys where applicable
+✓ Icon counts MATCH numbers mentioned in instructions (Rule 1)
+✓ Match activities use VISUALLY DIFFERENT icons on each side (Rule 2)
+✓ NO "match the coin to value" or similar same-icon matches (Rule 2)
+✓ Money values written as text (₹1, ₹5), not multiple coin icons (Rule 3)
+✓ Coloring activities limited to 3-5 large icons max (Rule 4)
+
+If your worksheet violates any rule, REGENERATE it before sending.
 
 Now generate the JSON output.`;
 }
