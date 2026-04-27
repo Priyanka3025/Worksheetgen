@@ -642,14 +642,19 @@
 
         /* Trace */
         .trace-row {
-            font-size: 32px;
-            color: #CCC;
-            letter-spacing: 16px;
-            padding: 16px;
+            font-size: 36px;
+            color: #C8C8C8;
+            letter-spacing: 18px;
+            padding: 24px 20px;
             background: #FAFAFA;
+            border: 2px dashed #DDD;
             border-radius: 10px;
             font-weight: 700;
             font-family: 'Inter', sans-serif;
+            text-align: center;
+            min-height: 80px;
+            line-height: 1.4;
+            word-spacing: 8px;
         }
 
         /* Footer */
@@ -1202,11 +1207,15 @@
                     break;
 
                 case 'color_picture':
-                    contentHTML = '<div class="color-picture-box">';
+                    contentHTML = '<div class="color-picture-box"><div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center;">';
                     (activity.icons || []).forEach(iconData => {
-                        contentHTML += `<div>${getIcon(iconData.icon, 120)}</div>`;
+                        const count = Math.min(iconData.count || 1, 12); // cap at 12 for visibility
+                        const size = count > 6 ? 60 : (count > 3 ? 80 : 120);
+                        for (let i = 0; i < count; i++) {
+                            contentHTML += `<div>${getIcon(iconData.icon, size)}</div>`;
+                        }
                     });
-                    contentHTML += '</div>';
+                    contentHTML += '</div></div>';
                     break;
 
                 case 'short_answer':
@@ -1262,7 +1271,26 @@
                     break;
 
                 case 'trace_letters':
-                    contentHTML = `<div class="trace-row">${escapeHTML(activity.letters || activity.content || '')}</div>`;
+                    // Handle multiple possible field names AI might use
+                    let traceContent = activity.letters || activity.numbers || activity.content || activity.text || '';
+                    // If still empty, check if items array was sent
+                    if (!traceContent && Array.isArray(activity.items)) {
+                        traceContent = activity.items.join(' ');
+                    }
+                    // If still empty, check questions array
+                    if (!traceContent && Array.isArray(activity.questions)) {
+                        traceContent = activity.questions.map(q => q.text || q).join(' ');
+                    }
+                    // Fallback: extract from any string property
+                    if (!traceContent) {
+                        for (const key in activity) {
+                            if (typeof activity[key] === 'string' && key !== 'type' && key !== 'title' && key !== 'instruction') {
+                                traceContent = activity[key];
+                                break;
+                            }
+                        }
+                    }
+                    contentHTML = `<div class="trace-row">${escapeHTML(traceContent || 'A B C D E')}</div>`;
                     break;
 
                 case 'draw_picture':
